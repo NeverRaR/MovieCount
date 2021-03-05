@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.moviecount.mapper.PersonMapper">
+
+    <resultMap id="PersonResultMap" type="com.moviecount.entity.Person">
+        <id column="nc" jdbcType="VARCHAR" property="nconst" />
+        <result column="biry" jdbcType="INTEGER" property="birthYear" />
+        <result column="deay" jdbcType="INTEGER" property="deathYear" />
+        <result column="na" jdbcType="VARCHAR" property="name" />
+    </resultMap>
+
+    <select id="selActorById"  resultMap="PersonResultMap">
+        select nconst nc,birth_year biry,death_year dery,actor_name na
+        from actor
+        where nconst = #{nconst}
+    </select>
+
+    <select id="selActorNconstByPage" resultType="java.lang.String">
+        select nconst
+        from actor
+        limit #{offset},100
+    </select>
+
+    <select id="selDirectorById"  resultMap="PersonResultMap">
+        select nconst nc,birth_year biry,death_year dery,director_name na
+        from director
+        where nconst = #{nconst}
+    </select>
+
+    <select id="selDirectorNconstByPage" resultType="java.lang.String">
+        select nconst
+        from director
+        limit #{offset},100
+    </select>
+
+    <select id="selActorByName"  resultMap="PersonResultMap">
+        select nconst nc,birth_year biry,death_year dery,actor_name na
+        from actor
+        where actor_name like concat('%',#{name},'%')
+    </select>
+
+    <select id="selDirectorByName"  resultMap="PersonResultMap">
+        select nconst nc,birth_year biry,death_year dery,director_name na
+        from director
+        where director_name like concat('%',#{name},'%')
+    </select>
+
+</mapper>

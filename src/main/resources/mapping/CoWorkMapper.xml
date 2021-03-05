@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.moviecount.mapper.CoWorkMapper">
+
+    <resultMap id="CoWorkResultMap" type="com.moviecount.entity.CoWorkRecord">
+        <result column="nc" jdbcType="VARCHAR" property="nconst" />
+        <result column="biry" jdbcType="INTEGER" property="birthYear" />
+        <result column="deay" jdbcType="INTEGER" property="deathYear" />
+        <result column="ct" jdbcType="INTEGER" property="cooTime" />
+        <result column="na" jdbcType="VARCHAR" property="name" />
+    </resultMap>
+
+    <resultMap id="AllCoWorkResultMap" type="com.moviecount.entity.Partner">
+        <result column="ct" jdbcType="INTEGER" property="cooTime" />
+        <result column="yna" jdbcType="VARCHAR" property="name1" />
+        <result column="zna" jdbcType="VARCHAR" property="name2" />
+        <result column="yby" jdbcType="INTEGER" property="birthYear1" />
+        <result column="zby" jdbcType="INTEGER" property="birthYear2" />
+        <result column="ydy" jdbcType="INTEGER" property="deathYear1" />
+        <result column="zdy" jdbcType="INTEGER" property="deathYear2" />
+        <result column="ync" jdbcType="VARCHAR" property="nconst1" />
+        <result column="znc" jdbcType="VARCHAR" property="nconst2" />
+    </resultMap>
+
+    <select id="selCoWork" resultMap="CoWorkResultMap">
+        select y.birth_year biry,y.death_year deay,y.nconst nc,x.ct ct,
+        <if test="cooper==0">
+            y.actor_name na
+        </if>
+        <if test="cooper==1">
+            y.director_name na
+        </if>
+        from(
+            select b.nconst,count(*) ct
+            from
+            <if test="as_role==0">
+                    play a
+            </if>
+            <if test="as_role==1">
+                    guidance a
+            </if>
+            <if test="cooper==0">
+                    join play b
+            </if>
+            <if test="cooper==1">
+                    join guidance b
+            </if>
+            on a.tconst=b.tconst
+            where a.nconst=#{nconst} and b.nconst != #{nconst}
+            group by b.nconst
+            ) x,
+        <if test="cooper==0">
+            actor y
+        </if>
+        <if test="cooper==1">
+            director y
+        </if>
+        where x.nconst=y.nconst
+        order by ct desc
+
+    </select>
+
+
+    <select id="selAllCoWork" resultMap="AllCoWorkResultMap">
+
+        select x.ct ct,y.birth_year yby,y.death_year ydy,y.nconst ync,z.birth_year zby,z.death_year zdy,z.nconst znc,
+        <choose>
+            <when test="style==1">
+               y.actor_name yna,z.actor_name zna
+            </when>
+            <when test="style==2">
+                y.director_name yna,z.actor_name zna
+            </when>
+            <when test="style==3">
+                y.director_name yna,z.director_name zna
+            </when>
+        </choose>
+        from(
+            select a.nconst anc,b.nconst bnc,count(*) ct
+            from
+            <choose>
+                <when test="style==1">
+                    play a join play b
+                </when>
+                <when test="style==2">
+                    guidance a join play b
+                </when>
+                <when test="style==3">
+                    guidance a join guidance b
+                </when>
+            </choose>
+            on a.tconst=b.tconst
+            where a.nconst != b.nconst
+            group by a.nconst,b.nconst
+            order by ct desc
+            limit 100
+            ) x,
+        <choose>
+            <when test="style==1">
+                actor y,actor z
+            </when>
+            <when test="style==2">
+                director y,actor z
+            </when>
+            <when test="style==3">
+                director y,director z
+            </when>
+        </choose>
+        where y.nconst=x.anc and z.nconst=x.bnc
+
+    </select>
+
+</mapper>

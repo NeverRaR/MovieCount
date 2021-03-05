@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.moviecount.mapper.MovieMapper">
+
+    <resultMap id="MovieResultMap" type="com.moviecount.entity.Movie">
+        <id column="t" jdbcType="VARCHAR" property="tconst" />
+        <result column="p" jdbcType="VARCHAR" property="primaryTitle" />
+        <result column="d" jdbcType="VARCHAR" property="dataDt" />
+        <result column="y" jdbcType="INTEGER" property="year" />
+        <result column="s" jdbcType="FLOAT" property="score"/>
+    </resultMap>
+
+
+    <select id="sel"  resultMap="MovieResultMap">
+        select m.tconst t,m.primary_title p,m.data_dt d,m.year y from movies m
+        <if test="director !=null and director!= ''">
+            join guidance gu on m.tconst = gu.tconst
+        </if>
+        <if test="actor !=null and actor != ''">
+            join play p on m.tconst = p.tconst
+        </if>
+        <if test="genres !=null and genres != ''">
+            join genres ge on m.tconst = ge.tconst
+        </if>
+        where 1=1
+        <if test="year != null">
+            and m.year =#{year}
+        </if>
+        <if test="season != null">
+            and m.month/4 = #{season}-1
+        </if>
+        <if test="month != null">
+            and m.month = #{month}
+        </if>
+        <if test="weekday != null">
+            and m.weekday = #{weekday}
+        </if>
+        <if test="day != null">
+            and m.day = #{day}
+        </if>
+        <if test="name !=null and name != ''">
+            and m.primary_title like concat('%',#{name},'%')
+        </if>
+        <if test="director != null">
+            and gu.nconst = #{director}
+        </if>
+        <if test="actor != null">
+            and p.nconst = #{actor}
+        </if>
+        <if test="genres != null">
+            and ge.genres = #{genres}
+        </if>
+        <choose>
+            <when test="score != null and above == 1">
+                and m.score &gt; #{score}
+            </when>
+            <when test="score != null and above == 2">
+                and m.score &lt; #{score}
+            </when>
+        </choose>
+    </select>
+
+    <select id="selTotal" resultMap="MovieResultMap">
+        select m.tconst t,m.primary_title p,m.data_dt d,m.year y,m.score s
+        from movies m
+        where m.tconst=#{tconst}
+    </select>
+
+    <select id="selDirectors" resultType="java.lang.String">
+        select nconst
+        from guidance
+        where tconst=#{tconst}
+    </select>
+
+    <select id="selActors" resultType="java.lang.String">
+        select nconst
+        from play
+        where tconst=#{tconst}
+    </select>
+
+    <select id="selGenres" resultType="java.lang.String">
+        select genres
+        from genres
+        where tconst=#{tconst}
+    </select>
+
+    <select id="selNum" resultType="java.lang.Integer">
+        select product_num
+        from movie_productnum
+        where tconst=#{tconst}
+    </select>
+
+</mapper>
